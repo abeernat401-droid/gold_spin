@@ -257,34 +257,45 @@ export default function UserWheelPage({
       ctx.globalAlpha = 1;
       ctx.restore();
 
-      // Prize label — large and clear
+      // Keep labels inside their slices and upright on the left half.
       ctx.save();
       ctx.translate(cx, cy);
-      ctx.rotate(midA);
+      const flipLabel = midA > Math.PI / 2 && midA < Math.PI * 1.5;
+      ctx.rotate(flipLabel ? midA + Math.PI : midA);
       ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
 
-      const fontSize = n > 10 ? 20 : n > 6 ? 26 : 30;
-      ctx.font = `900 ${fontSize}px "Segoe UI", "Arial", system-ui, sans-serif`;
+      const maxTextWidth = radius * 0.55;
+      let fontSize = Math.max(14, Math.min(22, Math.floor(160 / n + 2)));
+      const setLabelFont = () => {
+        ctx.font = `700 ${fontSize}px "Segoe UI", "Arial", system-ui, sans-serif`;
+      };
+      setLabelFont();
 
-      // Strong shadow for readability
-      ctx.shadowColor = 'rgba(0,0,0,0.6)';
-      ctx.shadowBlur = 4;
-      ctx.shadowOffsetX = 1;
-      ctx.shadowOffsetY = 1;
+      let label = prize.label.trim();
+      while (fontSize > 14 && ctx.measureText(label).width > maxTextWidth) {
+        fontSize -= 1;
+        setLabelFont();
+      }
+      if (ctx.measureText(label).width > maxTextWidth) {
+        const characters = Array.from(label);
+        while (characters.length > 1 && ctx.measureText(`${characters.join('')}…`).width > maxTextWidth) {
+          characters.pop();
+        }
+        label = `${characters.join('')}…`;
+      }
+
+      ctx.shadowColor = 'rgba(0,0,0,0.35)';
+      ctx.shadowBlur = 2;
       ctx.fillStyle = WHEEL_LABEL_COLOR;
 
-      const maxChars = n > 8 ? 12 : 16;
-      const lbl = prize.label.length > maxChars
-        ? prize.label.substring(0, maxChars - 1) + '…'
-        : prize.label;
-      // Position text in the middle of the slice radially
       const textRadius = radius * 0.58;
+      const labelX = flipLabel ? -textRadius : textRadius;
       ctx.strokeStyle = '#3b2b12';
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 1.5;
       ctx.lineJoin = 'round';
-      ctx.strokeText(lbl, textRadius, fontSize / 3);
-      ctx.fillText(lbl, textRadius, fontSize / 3);
-      ctx.shadowBlur = 0;
+      ctx.strokeText(label, labelX, 0);
+      ctx.fillText(label, labelX, 0);
       ctx.restore();
     });
 
