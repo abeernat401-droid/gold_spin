@@ -6,6 +6,18 @@ import {
   MessageSquare, Copy, Menu
 } from 'lucide-react';
 import { Prize, AccessRequest, WinRecord } from '../../types/types';
+import { readableTextColor } from '../../utils/colors';
+
+const sectorColors = [
+  { name: 'أصفر ذهبي', hex: '#E7B92B' },
+  { name: 'برتقالي دافئ', hex: '#D98A2B' },
+  { name: 'ذهبي فاتح', hex: '#E5C368' },
+  { name: 'نحاسي', hex: '#C56B36' },
+  { name: 'عاجي ذهبي', hex: '#F1D58A' },
+  { name: 'برونزي', hex: '#AD713D' },
+  { name: 'رملي', hex: '#DDBB73' },
+  { name: 'برتقالي محروق', hex: '#CE792E' },
+] as const;
 
 interface AdminPortalProps {
   prizes: Prize[];
@@ -42,6 +54,7 @@ export default function AdminPortal({
   const [prizeLabel, setPrizeLabel] = useState('');
   const [prizeProb, setPrizeProb] = useState(10);
   const [prizeColor, setPrizeColor] = useState('#ffffff');
+  const [isCustomColor, setIsCustomColor] = useState(false);
   const [prizeTextCol, setPrizeTextCol] = useState('#775a19');
   const [prizeStatus, setPrizeStatus] = useState<'نشط' | 'غير نشط'>('نشط');
   const [prizeCost, setPrizeCost] = useState<number>(100);
@@ -70,8 +83,9 @@ export default function AdminPortal({
     setEditingPrize(null);
     setPrizeLabel('');
     setPrizeProb(10);
-    setPrizeColor('#ffffff');
-    setPrizeTextCol('#775a19');
+    setPrizeColor(sectorColors[0].hex);
+    setIsCustomColor(false);
+    setPrizeTextCol(readableTextColor(sectorColors[0].hex));
     setPrizeStatus('نشط');
     setPrizeCost(100);
     setIsModalOpen(true);
@@ -82,6 +96,7 @@ export default function AdminPortal({
     setPrizeLabel(prize.label);
     setPrizeProb(prize.probability);
     setPrizeColor(prize.color);
+    setIsCustomColor(!sectorColors.some(color => color.hex.toLowerCase() === prize.color.toLowerCase()));
     setPrizeTextCol(prize.textColor);
     setPrizeStatus(prize.status);
     setPrizeCost(prize.cost ?? 0);
@@ -113,6 +128,12 @@ export default function AdminPortal({
       });
     }
     setIsModalOpen(false);
+  };
+
+  const selectSectorColor = (color: string, custom = false) => {
+    setPrizeColor(color);
+    setIsCustomColor(custom);
+    setPrizeTextCol(readableTextColor(color));
   };
 
   const handleGenerateReport = () => {
@@ -919,7 +940,7 @@ export default function AdminPortal({
       {/* 4. MODAL DIALOG: ADD/EDIT PRIZE */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-sm p-4 animate-fadeIn">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 border border-[#ffdea5] space-y-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-6 border border-[#ffdea5] space-y-4">
             
             <div className="flex justify-between items-center border-b border-[#d1c5b4]/80 pb-3">
               <button 
@@ -977,28 +998,45 @@ export default function AdminPortal({
                 />
               </div>
 
-              {/* Sector Colors and text colors */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#4e4639] block text-right">لون خط القطاع</label>
-                  <input
-                    type="color"
-                    required
-                    value={prizeTextCol}
-                    onChange={(e) => setPrizeTextCol(e.target.value)}
-                    className="w-full h-10 p-0.5 bg-white border border-[#d1c5b4] rounded-lg cursor-pointer block"
-                  />
+              {/* Sector color palette and custom picker */}
+              <div className="space-y-2" dir="rtl">
+                <label className="text-xs font-semibold text-[#4e4639] block">اختر لون القطاع من هذه الدرجات أو لونًا مخصصًا</label>
+                <div className="flex flex-wrap items-center gap-2">
+                  {sectorColors.map(({ name, hex }) => {
+                    const selected = !isCustomColor && prizeColor.toLowerCase() === hex.toLowerCase();
+                    return (
+                      <button
+                        key={hex}
+                        type="button"
+                        aria-label={name}
+                        aria-pressed={selected}
+                        title={name}
+                        onClick={() => selectSectorColor(hex)}
+                        className={`h-9 w-9 rounded-full border-2 cursor-pointer transition-transform hover:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#775a19] ${selected ? 'border-[#3b2b12] ring-2 ring-[#c5a059] ring-offset-2' : 'border-white shadow-sm'}`}
+                        style={{ backgroundColor: hex }}
+                      />
+                    );
+                  })}
+                  <label className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold text-[#4e4639]">
+                    <input
+                      type="color"
+                      aria-label="لون مخصص للقطاع"
+                      title="اختر لونًا مخصصًا"
+                      value={prizeColor}
+                      onChange={(e) => selectSectorColor(e.target.value, true)}
+                      className={`h-9 w-9 p-0.5 bg-white rounded border-2 cursor-pointer ${isCustomColor ? 'border-[#3b2b12] ring-2 ring-[#c5a059] ring-offset-2' : 'border-[#d1c5b4]'}`}
+                    />
+                    <span>مخصص</span>
+                  </label>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#4e4639] block text-right">لون القطاع</label>
-                  <input
-                    type="color"
-                    required
-                    value={prizeColor}
-                    onChange={(e) => setPrizeColor(e.target.value)}
-                    className="w-full h-10 p-0.5 bg-white border border-[#d1c5b4] rounded-lg cursor-pointer block"
-                  />
-                </div>
+                <label className="text-xs font-semibold text-[#4e4639] block pt-1">لون كتابة القطاع</label>
+                <input
+                  type="color"
+                  aria-label="لون كتابة القطاع"
+                  value={prizeTextCol}
+                  onChange={(e) => setPrizeTextCol(e.target.value)}
+                  className="h-9 w-20 p-0.5 bg-white border border-[#d1c5b4] rounded-lg cursor-pointer block"
+                />
               </div>
 
               {/* Status Selector */}

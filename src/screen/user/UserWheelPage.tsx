@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Gift, RefreshCw, User, Check, LogOut, Star, Sparkles } from 'lucide-react';
 import { Prize } from '../../types/types';
+import { isDarkColor } from '../../utils/colors';
 
 interface UserWheelPageProps {
   prizes: Prize[];
@@ -15,18 +16,6 @@ interface UserWheelPageProps {
   userDisplayName?: string;
   userEmail?: string;
 }
-
-// Vibrant premium jewel-tone palette — all white text
-const SLICE_COLORS = [
-  { bg: '#2D6A4F', bgLight: '#40916C', bgDark: '#1B4332', text: '#ffffff', dot: '#ffffff' }, // Emerald Green
-  { bg: '#E63946', bgLight: '#F05060', bgDark: '#C62B38', text: '#ffffff', dot: '#fff8e1' }, // Ruby Red
-  { bg: '#457B9D', bgLight: '#5A93B5', bgDark: '#356585', text: '#ffffff', dot: '#ffffff' }, // Ocean Blue
-  { bg: '#F4A261', bgLight: '#F7B87A', bgDark: '#E08840', text: '#ffffff', dot: '#fff8e1' }, // Sunset Orange
-  { bg: '#6A4C93', bgLight: '#8060B0', bgDark: '#553A78', text: '#ffffff', dot: '#ffffff' }, // Royal Purple
-  { bg: '#E76F51', bgLight: '#F08868', bgDark: '#D05A3C', text: '#ffffff', dot: '#fff8e1' }, // Coral
-  { bg: '#264653', bgLight: '#355A68', bgDark: '#1A3440', text: '#ffffff', dot: '#ffffff' }, // Deep Teal
-  { bg: '#E9C46A', bgLight: '#F0D080', bgDark: '#D4AE50', text: '#ffffff', dot: '#fff8e1' }, // Golden Honey
-];
 
 export default function UserWheelPage({
   prizes,
@@ -234,47 +223,36 @@ export default function UserWheelPage({
 
     const sliceAngle = (Math.PI * 2) / n;
 
-    // Draw each slice — alternating Black & Gold
+    // Draw every slice using the color saved for its prize.
     activePrizes.forEach((prize, i) => {
       const startA = i * sliceAngle;
       const endA = startA + sliceAngle;
       const midA = startA + sliceAngle / 2;
-      const p = SLICE_COLORS[i % SLICE_COLORS.length];
-      const isGold = i % 2 === 1;
-
-      // Radial gradient: bright near slice center, darker toward edge
-      const gx = cx + (radius * 0.5) * Math.cos(midA);
-      const gy = cy + (radius * 0.5) * Math.sin(midA);
-      const grad = ctx.createRadialGradient(gx, gy, 0, cx, cy, radius);
-      grad.addColorStop(0,   p.bgLight);
-      grad.addColorStop(0.5, p.bg);
-      grad.addColorStop(1,   p.bgDark);
+      const darkSlice = isDarkColor(prize.color);
 
       ctx.beginPath();
       ctx.moveTo(cx, cy);
       ctx.arc(cx, cy, radius - 5, startA, endA);
       ctx.closePath();
-      ctx.fillStyle = grad;
+      ctx.fillStyle = prize.color;
       ctx.fill();
 
-      // Gold divider lines (bright on black slice, dark on gold slice)
+      // Keep the boundary visible against light and dark prize colors.
       ctx.beginPath();
       ctx.moveTo(cx, cy);
       ctx.lineTo(cx + radius * Math.cos(startA), cy + radius * Math.sin(startA));
-      ctx.strokeStyle = isGold ? '#0d0900' : '#d4af37';
+      ctx.strokeStyle = darkSlice ? '#f5d47c' : '#3b2b12';
       ctx.lineWidth = 2.5;
-      ctx.globalAlpha = isGold ? 0.6 : 1;
       ctx.stroke();
-      ctx.globalAlpha = 1;
 
       // Decorative dot near outer edge
       const dotR = radius - 20;
       ctx.save();
       ctx.translate(cx + dotR * Math.cos(midA), cy + dotR * Math.sin(midA));
       ctx.beginPath();
-      ctx.arc(0, 0, isGold ? 4 : 3.5, 0, Math.PI * 2);
-      ctx.fillStyle = p.dot;
-      ctx.globalAlpha = isGold ? 0.7 : 0.85;
+      ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = prize.textColor;
+      ctx.globalAlpha = 0.8;
       ctx.fill();
       ctx.globalAlpha = 1;
       ctx.restore();
@@ -293,7 +271,7 @@ export default function UserWheelPage({
       ctx.shadowBlur = 4;
       ctx.shadowOffsetX = 1;
       ctx.shadowOffsetY = 1;
-      ctx.fillStyle = p.text;
+      ctx.fillStyle = prize.textColor;
 
       const maxChars = n > 8 ? 12 : 16;
       const lbl = prize.label.length > maxChars
