@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createServer as createViteServer } from 'vite';
-import app, { initializeDatabase } from './app';
+import app, { initializeDatabase } from './app.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 

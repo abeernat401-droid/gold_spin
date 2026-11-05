@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { randomBytes } from 'node:crypto';
 import { Pool } from 'pg';
-import { fixedAccounts } from './accounts';
+import { fixedAccounts } from './accounts.js';
 
 dotenv.config({ path: '.env.local', quiet: true });
 const base = `http://127.0.0.1:${process.env.PORT || 3000}`;

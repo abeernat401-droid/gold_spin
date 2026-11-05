@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { createServer } from 'node:http';
 import type { Request, Response } from 'express';
-import handler from '../api/index';
+import handler from '../api/index.js';
 
 dotenv.config({ path: '.env.local', quiet: true });
 

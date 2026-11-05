@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import app, { initializeDatabase } from '../server/app';
+import app, { initializeDatabase } from '../server/app.js';
 
 let ready: Promise<void> | undefined;
 

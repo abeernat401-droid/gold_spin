@@ -3,7 +3,7 @@ import express, { type Request, type Response, type NextFunction } from 'express
 import { randomBytes, randomInt, createHash, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
 import { Pool } from 'pg';
-import { fixedAccounts } from './accounts';
+import { fixedAccounts } from './accounts.js';
 
 dotenv.config({ path: '.env.local', quiet: true });
 
