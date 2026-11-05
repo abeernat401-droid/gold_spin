@@ -5,13 +5,12 @@ import { Prize } from '../../types/types';
 interface UserWheelPageProps {
   prizes: Prize[];
   onLogout: () => void;
-  onRecordWin: (
-    prizeLabel: string,
+  onSpin: (
     valueAssumed: number,
     customerName?: string,
     customerPhone?: string,
     customerAddress?: string
-  ) => void;
+  ) => Promise<{ prizeId: string }>;
   onAdminLoginClick?: () => void;
   userDisplayName?: string;
   userEmail?: string;
@@ -32,7 +31,7 @@ const SLICE_COLORS = [
 export default function UserWheelPage({
   prizes,
   onLogout,
-  onRecordWin,
+  onSpin,
   userDisplayName = 'عضو مميز',
   userEmail,
 }: UserWheelPageProps) {
@@ -395,20 +394,26 @@ export default function UserWheelPage({
     handleSpinClick();
   };
 
-  const spinTheWheel = () => {
+  const spinTheWheel = async () => {
     if (isSpinning || activePrizes.length === 0) return;
     setIsSpinning(true);
+    let result: { prizeId: string };
+    const val = Number(customerPrice);
+    try {
+      result = await onSpin(val, customerName, customerPhone);
+    } catch (error) {
+      setCustomerError(error instanceof Error ? error.message : 'تعذر تدوير العجلة.');
+      setIsSpinning(false);
+      return;
+    }
+    const idx = activePrizes.findIndex(p => p.id === result.prizeId);
+    if (idx < 0) {
+      setCustomerError('تغيرت الجوائز؛ حدّث الصفحة وحاول مجددًا.');
+      setIsSpinning(false);
+      return;
+    }
+    const prize = activePrizes[idx];
     startSpinSound(spinDuration, activePrizes.length);
-
-    const eligible = activePrizes.filter(p => p.probability > 0);
-    const pool = eligible.length > 0 ? eligible : activePrizes;
-    const total = pool.reduce((s, p) => s + p.probability, 0);
-    const rnd = Math.random() * (total || 100);
-    let acc = 0; let selected = pool[0];
-    for (const p of pool) { acc += p.probability; if (rnd <= acc) { selected = p; break; } }
-
-    const idx = activePrizes.findIndex(p => p.id === selected.id);
-    const prize = activePrizes[idx === -1 ? 0 : idx];
     setWinningPrize(prize);
 
     const deg = 360 / activePrizes.length;
@@ -422,13 +427,8 @@ export default function UserWheelPage({
       setIsSpinning(false);
       generateConfetti();
       playWinSound();
-      let val = Number(customerPrice);
-      if (isNaN(val) || val < 0) {
-        val = prize.cost ?? 50;
-      }
       setWinningValueAssumed(val);
       setShowWinModal(true);
-      onRecordWin(prize.label, val, customerName, customerPhone);
     }, Math.round(spinDuration * 1000));
   };
 

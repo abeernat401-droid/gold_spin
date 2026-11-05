@@ -13,8 +13,6 @@ interface AdminPortalProps {
   onAddPrize: (prize: Prize) => void;
   onEditPrize: (id: string, updated: Partial<Prize>) => void;
   onDeletePrize: (id: string) => void;
-  onUpdateAccessRequest: (id: string, status: 'مقبول' | 'مرفوض') => void;
-  onDeleteAccessRequest: (id: string) => void;
   onLogout: () => void;
   totalStats: { totalDistributed: number };
   wins: WinRecord[];
@@ -28,8 +26,6 @@ export default function AdminPortal({
   onAddPrize,
   onEditPrize,
   onDeletePrize,
-  onUpdateAccessRequest,
-  onDeleteAccessRequest,
   onLogout,
   totalStats,
   wins = [],
@@ -38,7 +34,6 @@ export default function AdminPortal({
 }: AdminPortalProps) {
   const [activeTab, setActiveTab] = useState<'prizes' | 'dashboard' | 'access' | 'settings'>('prizes');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [deleteWinId, setDeleteWinId] = useState<string | null>(null);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -211,7 +206,7 @@ export default function AdminPortal({
                   {accessRequests.filter(r => r.status === 'قيد الانتظار').length}
                 </span>
               )}
-              <span>طلبات المستخدمين</span>
+              <span>سجل الطلبات السابق</span>
               <Users className="w-4.5 h-4.5" />
             </button>
 
@@ -609,7 +604,7 @@ export default function AdminPortal({
             {/* Live Winners Registry Ledger */}
             <div className="gold-border bg-white rounded-xl overflow-hidden shadow-sm mt-6">
               <div className="bg-[#f3f3f4] p-4 border-b border-[#d1c5b4]/80 flex justify-between items-center">
-                <span className="text-[10px] bg-[#775a19]/10 text-[#775a19] px-2 py-0.5 rounded-full font-bold">بوابة متصلة بـ Firebase</span>
+                <span className="text-[10px] bg-[#775a19]/10 text-[#775a19] px-2 py-0.5 rounded-full font-bold">بوابة متصلة بـ Neon</span>
                 <h4 className="text-xs font-bold text-[#775a19]">سجل عمليات الفوز الأخيرة للعملاء (بيانات حيّة)</h4>
               </div>
               <div className="overflow-x-auto">
@@ -746,6 +741,7 @@ export default function AdminPortal({
         {/* C. USER ACCESS REQUESTS PANEL */}
         {activeTab === 'access' && (
           <div className="gold-border bg-white rounded-xl overflow-hidden shadow-sm animate-fadeIn">
+            <p className="p-4 text-xs text-[#775a19] bg-amber-50">هذا سجل الطلبات القديمة فقط، ولا يغيّر صلاحيات الحسابات الثابتة.</p>
             <div className="overflow-x-auto">
               <table className="w-full text-right border-collapse min-w-[600px]">
                 <thead>
@@ -755,14 +751,13 @@ export default function AdminPortal({
                     <th className="p-4">الغرض من الوصول</th>
                     <th className="p-4">تاريخ الطلب</th>
                     <th className="p-4 text-center">الحالة</th>
-                    <th className="p-4 text-left pl-8">الإجراءات</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#d1c5b4]/60">
                   {accessRequests.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="p-8 text-center text-xs text-[#4e4639]/70 font-medium">
-                        لا توجد طلبات وصول قيد الانتظار حالياً.
+                      <td colSpan={5} className="p-8 text-center text-xs text-[#4e4639]/70 font-medium">
+                        لا توجد طلبات سابقة.
                       </td>
                     </tr>
                   ) : (
@@ -791,57 +786,6 @@ export default function AdminPortal({
                           }`}>
                             {req.status}
                           </span>
-                        </td>
-
-                        <td className="p-4 text-left pl-8">
-                          <div className="flex items-center justify-start gap-2">
-                            {req.status === 'قيد الانتظار' ? (
-                              <>
-                                <button
-                                  onClick={() => onUpdateAccessRequest(req.id, 'مقبول')}
-                                  className="bg-emerald-600 hover:bg-emerald-700 text-white rounded p-1.5 transition-colors cursor-pointer"
-                                  title="الموافقة على الطلب"
-                                >
-                                  <Check className="w-3.5 h-3.5" />
-                                </button>
-                                <button
-                                  onClick={() => onUpdateAccessRequest(req.id, 'مرفوض')}
-                                  className="bg-red-600 hover:bg-red-700 text-white rounded p-1.5 transition-colors cursor-pointer"
-                                  title="رفض الطلب"
-                                >
-                                  <X className="w-3.5 h-3.5" />
-                                </button>
-                              </>
-                            ) : (
-                              <span className="text-[11px] text-[#4e4639] opacity-60 ml-2">تم الفصل ({req.status})</span>
-                            )}
-
-                            {/* Red Trash Delete Button with Click-to-Confirm to be Iframe-proof */}
-                            {confirmDeleteId === req.id ? (
-                              <button
-                                onClick={() => {
-                                  onDeleteAccessRequest(req.id);
-                                  setConfirmDeleteId(null);
-                                }}
-                                className="bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2.5 py-1.5 rounded transition-all animate-pulse cursor-pointer shadow-sm animate-fadeIn"
-                                title="تأكيد حذف المستخدم نهائياً"
-                              >
-                                تأكيد الحذف؟
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => {
-                                  setConfirmDeleteId(req.id);
-                                  // Auto-reset confirmation state in 4 seconds if not clicked
-                                  setTimeout(() => setConfirmDeleteId(prev => prev === req.id ? null : prev), 4000);
-                                }}
-                                className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded p-1.5 transition-colors cursor-pointer"
-                                title="حذف المستخدم نهائياً من الموقع"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                          </div>
                         </td>
 
                       </tr>

@@ -2,5 +2,5 @@
   "name": "Gold Spin",
   "description": "An exclusive, high-end VIP lucky wheel experience with an interactive administration portal and access control, crafted with luxury typography and details.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": []
 }
