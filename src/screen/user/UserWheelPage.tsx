@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Gift, RefreshCw, User, Check, LogOut, Star, Sparkles } from 'lucide-react';
 import { Prize } from '../../types/types';
-import { isDarkColor } from '../../utils/colors';
+import { isDarkColor, WHEEL_LABEL_COLOR } from '../../utils/colors';
 
 interface UserWheelPageProps {
   prizes: Prize[];
@@ -251,7 +251,7 @@ export default function UserWheelPage({
       ctx.translate(cx + dotR * Math.cos(midA), cy + dotR * Math.sin(midA));
       ctx.beginPath();
       ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
-      ctx.fillStyle = prize.textColor;
+      ctx.fillStyle = WHEEL_LABEL_COLOR;
       ctx.globalAlpha = 0.8;
       ctx.fill();
       ctx.globalAlpha = 1;
@@ -271,7 +271,7 @@ export default function UserWheelPage({
       ctx.shadowBlur = 4;
       ctx.shadowOffsetX = 1;
       ctx.shadowOffsetY = 1;
-      ctx.fillStyle = prize.textColor;
+      ctx.fillStyle = WHEEL_LABEL_COLOR;
 
       const maxChars = n > 8 ? 12 : 16;
       const lbl = prize.label.length > maxChars
@@ -279,6 +279,10 @@ export default function UserWheelPage({
         : prize.label;
       // Position text in the middle of the slice radially
       const textRadius = radius * 0.58;
+      ctx.strokeStyle = '#3b2b12';
+      ctx.lineWidth = 3;
+      ctx.lineJoin = 'round';
+      ctx.strokeText(lbl, textRadius, fontSize / 3);
       ctx.fillText(lbl, textRadius, fontSize / 3);
       ctx.shadowBlur = 0;
       ctx.restore();

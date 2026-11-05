@@ -6,7 +6,7 @@ import {
   MessageSquare, Copy, Menu
 } from 'lucide-react';
 import { Prize, AccessRequest, WinRecord } from '../../types/types';
-import { readableTextColor } from '../../utils/colors';
+import { WHEEL_LABEL_COLOR } from '../../utils/colors';
 
 const sectorColors = [
   { name: 'أصفر ذهبي', hex: '#E7B92B' },
@@ -55,7 +55,6 @@ export default function AdminPortal({
   const [prizeProb, setPrizeProb] = useState(10);
   const [prizeColor, setPrizeColor] = useState('#ffffff');
   const [isCustomColor, setIsCustomColor] = useState(false);
-  const [prizeTextCol, setPrizeTextCol] = useState('#775a19');
   const [prizeStatus, setPrizeStatus] = useState<'نشط' | 'غير نشط'>('نشط');
   const [prizeCost, setPrizeCost] = useState<number>(100);
 
@@ -85,7 +84,6 @@ export default function AdminPortal({
     setPrizeProb(10);
     setPrizeColor(sectorColors[0].hex);
     setIsCustomColor(false);
-    setPrizeTextCol(readableTextColor(sectorColors[0].hex));
     setPrizeStatus('نشط');
     setPrizeCost(100);
     setIsModalOpen(true);
@@ -97,7 +95,6 @@ export default function AdminPortal({
     setPrizeProb(prize.probability);
     setPrizeColor(prize.color);
     setIsCustomColor(!sectorColors.some(color => color.hex.toLowerCase() === prize.color.toLowerCase()));
-    setPrizeTextCol(prize.textColor);
     setPrizeStatus(prize.status);
     setPrizeCost(prize.cost ?? 0);
     setIsModalOpen(true);
@@ -112,7 +109,7 @@ export default function AdminPortal({
         label: prizeLabel,
         probability: Number(prizeProb),
         color: prizeColor,
-        textColor: prizeTextCol,
+        textColor: WHEEL_LABEL_COLOR,
         status: prizeStatus,
         cost: Number(prizeCost)
       });
@@ -122,7 +119,7 @@ export default function AdminPortal({
         label: prizeLabel,
         probability: Number(prizeProb),
         color: prizeColor,
-        textColor: prizeTextCol,
+        textColor: WHEEL_LABEL_COLOR,
         status: prizeStatus,
         cost: Number(prizeCost)
       });
@@ -133,7 +130,6 @@ export default function AdminPortal({
   const selectSectorColor = (color: string, custom = false) => {
     setPrizeColor(color);
     setIsCustomColor(custom);
-    setPrizeTextCol(readableTextColor(color));
   };
 
   const handleGenerateReport = () => {
@@ -1029,14 +1025,6 @@ export default function AdminPortal({
                     <span>مخصص</span>
                   </label>
                 </div>
-                <label className="text-xs font-semibold text-[#4e4639] block pt-1">لون كتابة القطاع</label>
-                <input
-                  type="color"
-                  aria-label="لون كتابة القطاع"
-                  value={prizeTextCol}
-                  onChange={(e) => setPrizeTextCol(e.target.value)}
-                  className="h-9 w-20 p-0.5 bg-white border border-[#d1c5b4] rounded-lg cursor-pointer block"
-                />
               </div>
 
               {/* Status Selector */}
