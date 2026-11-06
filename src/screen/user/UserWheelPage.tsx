@@ -254,15 +254,15 @@ export default function UserWheelPage({
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      const maxTextWidth = radius * 0.42;
-      let fontSize = Math.max(13, Math.min(20, Math.floor(155 / n + 3)));
+      const maxTextWidth = radius * 0.40;
+      let fontSize = Math.max(12, Math.min(18, Math.floor(150 / n + 3)));
       const setLabelFont = () => {
         ctx.font = `800 ${fontSize}px "Cairo", "Tajawal", "Segoe UI", system-ui, sans-serif`;
       };
       setLabelFont();
 
       let label = prize.label.trim();
-      while (fontSize > 13 && ctx.measureText(label).width > maxTextWidth) {
+      while (fontSize > 12 && ctx.measureText(label).width > maxTextWidth) {
         fontSize -= 1;
         setLabelFont();
       }
@@ -275,7 +275,7 @@ export default function UserWheelPage({
       }
 
       ctx.fillStyle = prize.textColor || wheelTextColor(prize.color);
-      const textRadius = radius * 0.69;
+      const textRadius = radius * 0.72;
       const labelX = flipLabel ? -textRadius : textRadius;
       ctx.shadowColor = 'rgba(0,0,0,0.12)';
       ctx.shadowBlur = 1;
@@ -710,11 +710,11 @@ export default function UserWheelPage({
                       onClick={handleSpinClick}
                       disabled={isSpinning}
                       style={{
-                        width:'clamp(118px,35vw,170px)', height:'clamp(118px,35vw,170px)', borderRadius:'50%',
+                        width:'clamp(72px,24%,112px)', height:'clamp(72px,24%,112px)', borderRadius:'50%',
                         background:'radial-gradient(circle at 40% 30%, #221a11 0%, #0d0a06 65%, #050403 100%)',
-                        border:'4px solid #d4af37',
-                        boxShadow:'0 0 0 3px #181208, 0 0 0 6px #ffd30a, 0 12px 35px rgba(0,0,0,0.7), inset 0 0 18px rgba(0,0,0,0.85), inset 0 0 0 1.5px #8e6d1b',
-                        display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'1px',
+                        border:'2.5px solid #d4af37',
+                        boxShadow:'0 0 0 1.5px #181208, 0 0 0 3.5px #ffd30a, 0 8px 22px rgba(0,0,0,0.65), inset 0 0 10px rgba(0,0,0,0.85)',
+                        display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'0px',
                         color:'#f5d37a', fontWeight:800, cursor: isSpinning ? 'not-allowed' : 'pointer',
                         padding:0, opacity: isSpinning ? 0.8 : 1, transition:'all 0.25s',
                         fontFamily:'"Playfair Display", "Segoe UI", sans-serif'
@@ -723,7 +723,7 @@ export default function UserWheelPage({
                       onMouseOut={(e) => { if(!isSpinning) e.currentTarget.style.transform = 'scale(1)'; }}
                     >
                       {/* Luxury Monogram Emblem */}
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ marginBottom:'2px', filter:'drop-shadow(0 0 5px rgba(255,211,10,0.7))' }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ marginBottom:'1px', filter:'drop-shadow(0 0 4px rgba(255,211,10,0.7))' }}>
                         <rect x="9" y="2" width="6" height="3" rx="1" fill="#FFD30A" stroke="#B48716" strokeWidth="0.8"/>
                         <rect x="10.5" y="5" width="3" height="2" fill="#FFE259"/>
                         <path d="M6 7.5C6 7 6.6 6.5 7.5 6.5H16.5C17.4 6.5 18 7 18 7.5L19 19C19 20.5 18 21.5 16.5 21.5H7.5C6 21.5 5 20.5 5 19L6 7.5Z" fill="url(#hubPerfumeGrad)" stroke="#FFD30A" strokeWidth="1"/>
@@ -737,9 +737,9 @@ export default function UserWheelPage({
                           </linearGradient>
                         </defs>
                       </svg>
-                      <span style={{ fontSize:'clamp(13px,3.4vw,18px)', lineHeight:1.1, letterSpacing:'0.14em', fontWeight:900 }}>ANGEL</span>
-                      <span style={{ fontSize:'clamp(9px,2.4vw,13px)', lineHeight:1.1, letterSpacing:'0.24em', opacity:0.95, color:'#f0ce4d' }}>PERFUM</span>
-                      <span style={{ fontFamily:'"Cairo", "Tajawal", "Segoe UI", sans-serif', fontSize:'clamp(8px,2vw,11px)', marginTop:'3px', color:'rgba(245,211,122,0.85)', fontWeight:600 }}>اضغط للسحب</span>
+                      <span style={{ fontSize:'clamp(9.5px,2.6vw,12.5px)', lineHeight:1.1, letterSpacing:'0.12em', fontWeight:900 }}>ANGEL</span>
+                      <span style={{ fontSize:'clamp(7px,1.9vw,9.5px)', lineHeight:1.1, letterSpacing:'0.2em', opacity:0.95, color:'#f0ce4d' }}>PERFUM</span>
+                      <span style={{ fontFamily:'"Cairo", "Tajawal", "Segoe UI", sans-serif', fontSize:'clamp(6.5px,1.6vw,8.5px)', marginTop:'2px', color:'rgba(245,211,122,0.85)', fontWeight:600 }}>اضغط للسحب</span>
                     </button>
                   </div>
                 </div>
