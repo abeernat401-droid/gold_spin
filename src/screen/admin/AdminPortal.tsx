@@ -6,17 +6,34 @@ import {
   MessageSquare, Copy, Menu
 } from 'lucide-react';
 import { Prize, AccessRequest, WinRecord } from '../../types/types';
-import { WHEEL_LABEL_COLOR } from '../../utils/colors';
+import { wheelTextColor, isDarkColor } from '../../utils/colors';
 
 const sectorColors = [
-  { name: 'أصفر ذهبي', hex: '#E7B92B' },
-  { name: 'برتقالي دافئ', hex: '#D98A2B' },
-  { name: 'ذهبي فاتح', hex: '#E5C368' },
-  { name: 'نحاسي', hex: '#C56B36' },
-  { name: 'عاجي ذهبي', hex: '#F1D58A' },
-  { name: 'برونزي', hex: '#AD713D' },
-  { name: 'رملي', hex: '#DDBB73' },
-  { name: 'برتقالي محروق', hex: '#CE792E' },
+  { name: 'أصفر ليموني ساطع', hex: '#FDD601' },
+  { name: 'أصفر ذهبي كلاسيكي', hex: '#FFD30A' },
+  { name: 'أصفر مشرق', hex: '#FFE000' },
+  { name: 'ذهبي ساطع', hex: '#F0CE04' },
+  { name: 'ذهبي دافئ', hex: '#E0AC2D' },
+  { name: 'ذهبي عتيق', hex: '#D8A522' },
+  { name: 'برونزي ذهبي عميق', hex: '#B5830C' },
+  { name: 'برتقالي دافئ', hex: '#F18404' },
+  { name: 'برتقالي ساطع', hex: '#F68B1E' },
+  { name: 'مشمشي ذهبي', hex: '#F2AC44' },
+  { name: 'وردي ترابي / سلموني', hex: '#EEA160' },
+  { name: 'كراميل نحاسي', hex: '#CE792E' },
+] as const;
+
+const textColors = [
+  { name: 'أسود فحمي دافئ', hex: '#1A1105' },
+  { name: 'بني داكن عميق', hex: '#2C2010' },
+  { name: 'بني شوكولاتة داكن', hex: '#3B2A13' },
+  { name: 'برونزي داكن', hex: '#583100' },
+  { name: 'بني ذهبي عتيق', hex: '#775A19' },
+  { name: 'ذهبي داكن', hex: '#8B5D12' },
+  { name: 'ذهبي ملكي', hex: '#C18B1E' },
+  { name: 'ذهبي فاتح', hex: '#F6D25E' },
+  { name: 'عاجي دافئ', hex: '#FFF1C8' },
+  { name: 'أبيض ناصع', hex: '#FFFFFF' },
 ] as const;
 
 interface AdminPortalProps {
@@ -55,6 +72,8 @@ export default function AdminPortal({
   const [prizeProb, setPrizeProb] = useState(10);
   const [prizeColor, setPrizeColor] = useState('#ffffff');
   const [isCustomColor, setIsCustomColor] = useState(false);
+  const [prizeTextCol, setPrizeTextCol] = useState('#2C2010');
+  const [isCustomTextColor, setIsCustomTextColor] = useState(false);
   const [prizeStatus, setPrizeStatus] = useState<'نشط' | 'غير نشط'>('نشط');
   const [prizeCost, setPrizeCost] = useState<number>(100);
 
@@ -84,6 +103,8 @@ export default function AdminPortal({
     setPrizeProb(10);
     setPrizeColor(sectorColors[0].hex);
     setIsCustomColor(false);
+    setPrizeTextCol(wheelTextColor(sectorColors[0].hex));
+    setIsCustomTextColor(false);
     setPrizeStatus('نشط');
     setPrizeCost(100);
     setIsModalOpen(true);
@@ -95,6 +116,8 @@ export default function AdminPortal({
     setPrizeProb(prize.probability);
     setPrizeColor(prize.color);
     setIsCustomColor(!sectorColors.some(color => color.hex.toLowerCase() === prize.color.toLowerCase()));
+    setPrizeTextCol(prize.textColor);
+    setIsCustomTextColor(!textColors.some(color => color.hex.toLowerCase() === prize.textColor.toLowerCase()));
     setPrizeStatus(prize.status);
     setPrizeCost(prize.cost ?? 0);
     setIsModalOpen(true);
@@ -109,7 +132,7 @@ export default function AdminPortal({
         label: prizeLabel,
         probability: Number(prizeProb),
         color: prizeColor,
-        textColor: WHEEL_LABEL_COLOR,
+        textColor: prizeTextCol,
         status: prizeStatus,
         cost: Number(prizeCost)
       });
@@ -119,7 +142,7 @@ export default function AdminPortal({
         label: prizeLabel,
         probability: Number(prizeProb),
         color: prizeColor,
-        textColor: WHEEL_LABEL_COLOR,
+        textColor: prizeTextCol,
         status: prizeStatus,
         cost: Number(prizeCost)
       });
@@ -130,6 +153,13 @@ export default function AdminPortal({
   const selectSectorColor = (color: string, custom = false) => {
     setPrizeColor(color);
     setIsCustomColor(custom);
+    setPrizeTextCol(wheelTextColor(color));
+    setIsCustomTextColor(false);
+  };
+
+  const selectTextColor = (color: string, custom = false) => {
+    setPrizeTextCol(color);
+    setIsCustomTextColor(custom);
   };
 
   const handleGenerateReport = () => {
@@ -394,14 +424,16 @@ export default function AdminPortal({
                           ${(prize.cost ?? 0).toLocaleString('ar-EG')}
                         </td>
 
-                        {/* Segment Color Circle Preview */}
+                        {/* Segment & Text Color Preview */}
                         <td className="p-4 text-center">
                           <div className="flex justify-center">
                             <div
-                              className="w-7 h-7 rounded-full border border-[#d1c5b4] shadow-sm flex items-center justify-center text-[10px]"
-                              style={{ backgroundColor: prize.color }}
-                              title={prize.color}
-                            />
+                              className="w-8 h-8 rounded-lg border border-[#d1c5b4] shadow-sm flex items-center justify-center text-xs font-bold transition-transform hover:scale-110"
+                              style={{ backgroundColor: prize.color, color: prize.textColor || '#2C2010' }}
+                              title={`لون القطاع: ${prize.color} | لون الخط: ${prize.textColor || '#2C2010'}`}
+                            >
+                              هدية
+                            </div>
                           </div>
                         </td>
 
@@ -996,7 +1028,10 @@ export default function AdminPortal({
 
               {/* Sector color palette and custom picker */}
               <div className="space-y-2" dir="rtl">
-                <label className="text-xs font-semibold text-[#4e4639] block">اختر لون القطاع من هذه الدرجات أو لونًا مخصصًا</label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-[#4e4639] block">لون القطاع (درجات ألوان الدولاب)</label>
+                  <span className="text-[10px] text-[#775a19] font-mono font-bold">{prizeColor}</span>
+                </div>
                 <div className="flex flex-wrap items-center gap-2">
                   {sectorColors.map(({ name, hex }) => {
                     const selected = !isCustomColor && prizeColor.toLowerCase() === hex.toLowerCase();
@@ -1008,22 +1043,104 @@ export default function AdminPortal({
                         aria-pressed={selected}
                         title={name}
                         onClick={() => selectSectorColor(hex)}
-                        className={`h-9 w-9 rounded-full border-2 cursor-pointer transition-transform hover:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#775a19] ${selected ? 'border-[#3b2b12] ring-2 ring-[#c5a059] ring-offset-2' : 'border-white shadow-sm'}`}
+                        className={`h-9 w-9 rounded-lg border-2 cursor-pointer transition-all hover:scale-110 flex items-center justify-center ${
+                          selected
+                            ? 'border-[#2C2010] ring-2 ring-[#FFD30A] ring-offset-2 scale-105 shadow-md'
+                            : 'border-[#d1c5b4]/60 hover:border-[#775a19] shadow-sm'
+                        }`}
                         style={{ backgroundColor: hex }}
-                      />
+                      >
+                        {selected && (
+                          <Check size={14} strokeWidth={3} className="text-[#2C2010] drop-shadow-sm" />
+                        )}
+                      </button>
                     );
                   })}
-                  <label className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold text-[#4e4639]">
+                  <label className={`h-9 px-2.5 rounded-lg border-2 flex items-center gap-1.5 cursor-pointer text-xs font-semibold text-[#4e4639] transition-all bg-white ${
+                    isCustomColor ? 'border-[#2C2010] ring-2 ring-[#FFD30A] ring-offset-2 shadow-md' : 'border-[#d1c5b4]/60 hover:border-[#775a19]'
+                  }`}>
                     <input
                       type="color"
                       aria-label="لون مخصص للقطاع"
                       title="اختر لونًا مخصصًا"
                       value={prizeColor}
                       onChange={(e) => selectSectorColor(e.target.value, true)}
-                      className={`h-9 w-9 p-0.5 bg-white rounded border-2 cursor-pointer ${isCustomColor ? 'border-[#3b2b12] ring-2 ring-[#c5a059] ring-offset-2' : 'border-[#d1c5b4]'}`}
+                      className="w-5 h-5 p-0 bg-transparent rounded cursor-pointer border-0"
                     />
-                    <span>مخصص</span>
+                    <span className="text-[11px]">مخصص</span>
                   </label>
+                </div>
+              </div>
+
+              {/* Text color palette and custom picker */}
+              <div className="space-y-2" dir="rtl">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-[#4e4639] block">لون خط الجائزة (درجات ألوان الكتابة)</label>
+                  <span className="text-[10px] text-[#775a19] font-mono font-bold">{prizeTextCol}</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  {textColors.map(({ name, hex }) => {
+                    const selected = !isCustomTextColor && prizeTextCol.toLowerCase() === hex.toLowerCase();
+                    return (
+                      <button
+                        key={hex}
+                        type="button"
+                        aria-label={name}
+                        aria-pressed={selected}
+                        title={name}
+                        onClick={() => selectTextColor(hex)}
+                        className={`h-9 w-9 rounded-lg border-2 cursor-pointer transition-all hover:scale-110 flex items-center justify-center ${
+                          selected
+                            ? 'border-[#FFD30A] ring-2 ring-[#775a19] ring-offset-2 scale-105 shadow-md'
+                            : 'border-[#d1c5b4]/60 hover:border-[#775a19] shadow-sm'
+                        }`}
+                        style={{ backgroundColor: hex }}
+                      >
+                        {selected && (
+                          <Check
+                            size={14}
+                            strokeWidth={3}
+                            style={{ color: isDarkColor(hex) ? '#FFF1C8' : '#2C2010' }}
+                            className="drop-shadow-sm"
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
+                  <label className={`h-9 px-2.5 rounded-lg border-2 flex items-center gap-1.5 cursor-pointer text-xs font-semibold text-[#4e4639] transition-all bg-white ${
+                    isCustomTextColor ? 'border-[#FFD30A] ring-2 ring-[#775a19] ring-offset-2 shadow-md' : 'border-[#d1c5b4]/60 hover:border-[#775a19]'
+                  }`}>
+                    <input
+                      type="color"
+                      aria-label="لون كتابة مخصص"
+                      title="اختر لون كتابة مخصصًا"
+                      value={prizeTextCol}
+                      onChange={(e) => selectTextColor(e.target.value, true)}
+                      className="w-5 h-5 p-0 bg-transparent rounded cursor-pointer border-0"
+                    />
+                    <span className="text-[11px]">مخصص</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Live Preview Card */}
+              <div
+                className="rounded-xl border-2 border-[#775a19]/30 p-3.5 transition-all shadow-sm"
+                style={{ backgroundColor: prizeColor }}
+                dir="rtl"
+              >
+                <div className="flex items-center justify-between mb-1 opacity-75" style={{ color: prizeTextCol }}>
+                  <span className="text-[11px] font-medium">معاينة شكل الجائزة على قطعة الدولاب</span>
+                  <span className="text-[10px] font-mono">طراز فاخر</span>
+                </div>
+                <div
+                  className="py-2.5 text-center text-base font-black tracking-wide"
+                  style={{
+                    color: prizeTextCol,
+                    fontFamily: '"Cairo", "Tajawal", "Segoe UI", sans-serif'
+                  }}
+                >
+                  {prizeLabel || 'اسم الجائزة هنا'}
                 </div>
               </div>
 

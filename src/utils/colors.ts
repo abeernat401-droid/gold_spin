@@ -1,5 +1,3 @@
-export const WHEEL_LABEL_COLOR = '#F6CD59';
-
 export function isDarkColor(hex: string): boolean {
   const value = hex.replace(/^#/, '');
   const rgb = value.length === 3 || value.length === 4
@@ -7,5 +5,9 @@ export function isDarkColor(hex: string): boolean {
     : [0, 2, 4].map(offset => parseInt(value.slice(offset, offset + 2), 16));
 
   if (rgb.some(channel => !Number.isFinite(channel))) return false;
-  return (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000 < 150;
+  return (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000 < 110;
+}
+
+export function wheelTextColor(background: string): string {
+  return isDarkColor(background) ? '#FFF1C8' : '#2C2010';
 }

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Gift, RefreshCw, User, Check, LogOut, Star, Sparkles } from 'lucide-react';
 import { Prize } from '../../types/types';
-import { isDarkColor, WHEEL_LABEL_COLOR } from '../../utils/colors';
+import { isDarkColor, wheelTextColor } from '../../utils/colors';
 
 interface UserWheelPageProps {
   prizes: Prize[];
@@ -237,43 +237,32 @@ export default function UserWheelPage({
       ctx.fillStyle = prize.color;
       ctx.fill();
 
-      // Keep the boundary visible against light and dark prize colors.
+      // Fine bronze dividers like the reference wheel.
       ctx.beginPath();
       ctx.moveTo(cx, cy);
       ctx.lineTo(cx + radius * Math.cos(startA), cy + radius * Math.sin(startA));
-      ctx.strokeStyle = darkSlice ? '#f5d47c' : '#3b2b12';
-      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = darkSlice ? '#ffd30a' : '#6e4815';
+      ctx.lineWidth = 1.6;
       ctx.stroke();
 
-      // Decorative dot near outer edge
-      const dotR = radius - 20;
-      ctx.save();
-      ctx.translate(cx + dotR * Math.cos(midA), cy + dotR * Math.sin(midA));
-      ctx.beginPath();
-      ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
-      ctx.fillStyle = WHEEL_LABEL_COLOR;
-      ctx.globalAlpha = 0.8;
-      ctx.fill();
-      ctx.globalAlpha = 1;
-      ctx.restore();
-
-      // Keep labels inside their slices and upright on the left half.
+      // Keep labels inside their slices and upright on the left half & top slice.
       ctx.save();
       ctx.translate(cx, cy);
-      const flipLabel = midA > Math.PI / 2 && midA < Math.PI * 1.5;
+      const normA = ((midA % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+      const flipLabel = normA >= Math.PI * 0.5 - 0.05 && normA <= Math.PI * 1.5 + 0.05;
       ctx.rotate(flipLabel ? midA + Math.PI : midA);
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      const maxTextWidth = radius * 0.55;
-      let fontSize = Math.max(14, Math.min(22, Math.floor(160 / n + 2)));
+      const maxTextWidth = radius * 0.42;
+      let fontSize = Math.max(13, Math.min(20, Math.floor(155 / n + 3)));
       const setLabelFont = () => {
-        ctx.font = `700 ${fontSize}px "Segoe UI", "Arial", system-ui, sans-serif`;
+        ctx.font = `800 ${fontSize}px "Cairo", "Tajawal", "Segoe UI", system-ui, sans-serif`;
       };
       setLabelFont();
 
       let label = prize.label.trim();
-      while (fontSize > 14 && ctx.measureText(label).width > maxTextWidth) {
+      while (fontSize > 13 && ctx.measureText(label).width > maxTextWidth) {
         fontSize -= 1;
         setLabelFont();
       }
@@ -285,82 +274,38 @@ export default function UserWheelPage({
         label = `${characters.join('')}…`;
       }
 
-      ctx.shadowColor = 'rgba(0,0,0,0.35)';
-      ctx.shadowBlur = 2;
-      ctx.fillStyle = WHEEL_LABEL_COLOR;
-
-      const textRadius = radius * 0.58;
+      ctx.fillStyle = prize.textColor || wheelTextColor(prize.color);
+      const textRadius = radius * 0.69;
       const labelX = flipLabel ? -textRadius : textRadius;
-      ctx.strokeStyle = '#3b2b12';
-      ctx.lineWidth = 1.5;
-      ctx.lineJoin = 'round';
-      ctx.strokeText(label, labelX, 0);
+      ctx.shadowColor = 'rgba(0,0,0,0.12)';
+      ctx.shadowBlur = 1;
       ctx.fillText(label, labelX, 0);
       ctx.restore();
     });
 
-    // Outer thick dark border
+    // Multi-ring outer border matching reference wheel
     ctx.beginPath();
-    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-    ctx.lineWidth = 18;
-    ctx.strokeStyle = '#1e1810';
-    ctx.stroke();
-
-    // Outer gold conic ring
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius - 7, 0, Math.PI * 2);
+    ctx.arc(cx, cy, radius - 2, 0, Math.PI * 2);
     ctx.lineWidth = 5;
-    const conicGrad = ctx.createLinearGradient(0, 0, SIZE, SIZE);
-    conicGrad.addColorStop(0,   '#fff8e1');
-    conicGrad.addColorStop(0.3, '#d4af37');
-    conicGrad.addColorStop(0.6, '#fde8a0');
-    conicGrad.addColorStop(1,   '#c9a84c');
-    ctx.strokeStyle = conicGrad;
-    ctx.shadowColor = 'rgba(212,175,55,0.9)';
-    ctx.shadowBlur = 20;
+    ctx.strokeStyle = '#d4af37';
     ctx.stroke();
-    ctx.restore();
 
-    // Inner thin separator ring
     ctx.beginPath();
-    ctx.arc(cx, cy, radius - 14, 0, Math.PI * 2);
+    ctx.arc(cx, cy, radius - 6, 0, Math.PI * 2);
+    ctx.lineWidth = 3.5;
+    ctx.strokeStyle = '#1e170c';
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius - 10, 0, Math.PI * 2);
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#ffd30a';
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius - 13, 0, Math.PI * 2);
     ctx.lineWidth = 1.5;
-    ctx.strokeStyle = 'rgba(212,175,55,0.3)';
-    ctx.stroke();
-
-    // Diamond tick marks
-    const tickN = Math.max(n * 2, 20);
-    for (let t = 0; t < tickN; t++) {
-      const ta = (t / tickN) * Math.PI * 2;
-      ctx.save();
-      ctx.translate(cx + (radius - 5) * Math.cos(ta), cy + (radius - 5) * Math.sin(ta));
-      ctx.rotate(ta + Math.PI / 4);
-      ctx.fillStyle = t % 2 === 0 ? '#fde8a0' : 'rgba(212,175,55,0.4)';
-      ctx.fillRect(-2.5, -2.5, 5, 5);
-      ctx.restore();
-    }
-
-    // Small center hub — clean golden dot (no clock)
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, cy, 22, 0, Math.PI * 2);
-    const hubGrad = ctx.createRadialGradient(cx - 4, cy - 4, 0, cx, cy, 22);
-    hubGrad.addColorStop(0,   '#fff8e1');
-    hubGrad.addColorStop(0.3, '#fde8a0');
-    hubGrad.addColorStop(0.7, '#d4af37');
-    hubGrad.addColorStop(1,   '#7a5c1a');
-    ctx.fillStyle = hubGrad;
-    ctx.shadowColor = 'rgba(0,0,0,0.6)';
-    ctx.shadowBlur = 15;
-    ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.restore();
-
-    ctx.beginPath();
-    ctx.arc(cx, cy, 22, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#765018';
     ctx.stroke();
   };
 
@@ -688,22 +633,19 @@ export default function UserWheelPage({
 
         {/* Heading */}
         <div className="fade-in-up" style={{ textAlign:'center', width:'100%', maxWidth:'600px' }}>
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'10px', marginBottom:'10px' }}>
-            <Star size={14} style={{ color:'#d4af37' }}/>
-            <span style={{ fontSize:'0.68rem', letterSpacing:'0.28em', textTransform:'uppercase', color:'rgba(212,175,55,0.65)', fontWeight:700 }}>عجلة الجوائز الفاخرة</span>
-            <Star size={14} style={{ color:'#d4af37' }}/>
-          </div>
-          
-          {/* Title */}
-          <div style={{ margin: '14px 0', textAlign: 'center', width: '100%', padding: '0 10px' }}>
-            <h1 className="shimmer-text" style={{ fontFamily:'"Playfair Display",serif', fontSize:'clamp(1.6rem, 5vw, 2.5rem)', fontWeight:900, letterSpacing:'0.04em', lineHeight:1.4, margin:0, textShadow:'0 2px 20px rgba(212,175,55,0.4)', textTransform:'capitalize' }} dir="rtl">
-              أهلاً بكم في Angel Perfum
+          {/* Title matching reference screenshot */}
+          <div style={{ margin: '6px 0 10px', textAlign: 'center', width: '100%', padding: '0 10px' }}>
+            <h1 className="shimmer-text" style={{ fontFamily:'"Cairo", "Playfair Display", serif', fontSize:'clamp(2rem, 5.8vw, 2.8rem)', fontWeight:900, letterSpacing:'0.02em', lineHeight:1.3, margin:0, textShadow:'0 2px 20px rgba(212,175,55,0.45)' }} dir="rtl">
+              عجلة الهدايا
             </h1>
+            <p style={{ margin:'4px 0 0', fontSize:'clamp(0.85rem, 2.5vw, 1.05rem)', fontWeight:700, color:'#f5d37a', letterSpacing:'0.12em', fontFamily:'"Playfair Display", serif' }}>
+              Angel Perfum
+            </p>
           </div>
           
-          <div style={{ height:'1.5px', width:'140px', background:'linear-gradient(90deg,transparent,#d4af37,transparent)', margin:'14px auto 14px', borderRadius:'2px' }}/>
+          <div style={{ height:'1.5px', width:'140px', background:'linear-gradient(90deg,transparent,#d4af37,transparent)', margin:'10px auto 14px', borderRadius:'2px' }}/>
           
-          <h2 style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', fontFamily:'"Hanken Grotesk", "Segoe UI", sans-serif', fontSize:'clamp(1.1rem, 4vw, 1.4rem)', fontWeight:800, color:'#fde8a0', margin:0, letterSpacing:'0.02em', textShadow:'0 2px 10px rgba(0,0,0,0.5)' }}>
+          <h2 style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', fontFamily:'"Hanken Grotesk", "Segoe UI", sans-serif', fontSize:'clamp(1rem, 3.6vw, 1.3rem)', fontWeight:800, color:'#fde8a0', margin:0, letterSpacing:'0.02em', textShadow:'0 2px 10px rgba(0,0,0,0.5)' }}>
             <span>دور واربح هديتك</span>
             <span>🎁</span>
           </h2>
@@ -712,19 +654,20 @@ export default function UserWheelPage({
         {/* ── WHEEL ── */}
         <div style={{ position:'relative', display:'flex', flexDirection:'column', alignItems:'center' }}>
 
+          {/* Top golden horizon aura bar behind pointer */}
+          <div style={{ position:'absolute', top:'-12px', left:'50%', transform:'translateX(-50%)', width:'220px', height:'28px', background:'radial-gradient(ellipse at center, rgba(255,211,10,0.4) 0%, rgba(212,175,55,0.18) 45%, transparent 75%)', pointerEvents:'none', zIndex:35 }}/>
+
           {/* SVG Pointer - Static at the top */}
-          <div ref={pointerRef} style={{ position:'absolute', top:'-24px', left:'50%', transform:'translateX(-50%)', zIndex:40, filter:'drop-shadow(0 8px 16px rgba(212,175,55,0.9))', transition:'transform 0.05s ease-out', transformOrigin:'50% 100%' }}>
-            <svg width="34" height="44" viewBox="0 0 34 44" fill="none">
+          <div ref={pointerRef} style={{ position:'absolute', top:'-22px', left:'50%', transform:'translateX(-50%)', zIndex:40, filter:'drop-shadow(0 0 14px rgba(255,211,10,0.95))' }}>
+            <svg width="42" height="44" viewBox="0 0 42 44" fill="none" aria-hidden="true">
+              <polygon points="21,44 1,2 41,2" fill="url(#pointerGoldGrad)" stroke="#8E650A" strokeWidth="2"/>
               <defs>
-                <linearGradient id="pgrd" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%"   stopColor="#fff8e1"/>
-                  <stop offset="35%"  stopColor="#fde8a0"/>
-                  <stop offset="70%"  stopColor="#d4af37"/>
-                  <stop offset="100%" stopColor="#7a5c1a"/>
+                <linearGradient id="pointerGoldGrad" x1="21" y1="2" x2="21" y2="44" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#FFF2A8"/>
+                  <stop offset="0.4" stopColor="#FFD30A"/>
+                  <stop offset="1" stopColor="#D4A116"/>
                 </linearGradient>
               </defs>
-              <polygon points="17,44 0,0 34,0" fill="url(#pgrd)"/>
-              <polygon points="17,44 0,0 34,0" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="1.2"/>
             </svg>
           </div>
 
@@ -732,7 +675,7 @@ export default function UserWheelPage({
           <div style={{ position:'relative', display:'inline-flex', alignItems:'center', justifyContent:'center' }}>
 
             {/* Conic gold border frame */}
-            <div style={{ borderRadius:'50%', padding:'0px', background:'conic-gradient(from 0deg,#7a5c1a,#d4af37,#fff8e1,#d4af37,#c9a84c,#d4af37,#fff8e1,#d4af37,#7a5c1a)', boxShadow:'0 0 50px rgba(212,175,55,0.4), 0 0 100px rgba(212,175,55,0.15)' }}>
+            <div style={{ borderRadius:'50%', padding:'4px', background:'conic-gradient(from 0deg,#9d7114,#f7d943,#b48716,#ffdf53,#9d7114)', boxShadow:'0 0 40px rgba(245,195,29,0.45), 0 0 90px rgba(212,175,55,0.14)' }}>
 
               {/* Dark bezel */}
               <div style={{ borderRadius:'50%', padding:'0px', background:'transparent' }}>
@@ -757,29 +700,46 @@ export default function UserWheelPage({
                   </div>
 
                   {/* Glass shine */}
-                  <div style={{ position:'absolute', inset:0, borderRadius:'50%', background:'radial-gradient(circle at 32% 28%, rgba(255,255,255,0.1) 0%, transparent 55%)', pointerEvents:'none' }}/>
+                  <div style={{ position:'absolute', inset:0, borderRadius:'50%', background:'radial-gradient(circle at 32% 28%, rgba(255,255,255,0.06) 0%, transparent 55%)', pointerEvents:'none' }}/>
 
                   {/* Center Spin Button Overlay */}
                   <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%, -50%)', zIndex:50 }}>
                     <button
                       type="button"
+                      aria-label="اسحب عجلة الجوائز"
                       onClick={handleSpinClick}
                       disabled={isSpinning}
                       style={{
-                        width:'86px', height:'86px', borderRadius:'50%',
-                        background:'linear-gradient(135deg, #fde8a0 0%, #d4af37 50%, #7a5c1a 100%)',
-                        border:'3px solid #1e1810',
-                        boxShadow:'0 0 30px rgba(0,0,0,0.8), inset 0 2px 10px rgba(255,255,255,0.4)',
-                        display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
-                        color:'#1a130a', fontWeight:900, fontSize:'0.9rem', cursor: isSpinning ? 'not-allowed' : 'pointer',
-                        padding:0, opacity: isSpinning ? 0.8 : 1, transition:'all 0.2s',
-                        fontFamily:'"Hanken Grotesk", sans-serif'
+                        width:'clamp(118px,35vw,170px)', height:'clamp(118px,35vw,170px)', borderRadius:'50%',
+                        background:'radial-gradient(circle at 40% 30%, #221a11 0%, #0d0a06 65%, #050403 100%)',
+                        border:'4px solid #d4af37',
+                        boxShadow:'0 0 0 3px #181208, 0 0 0 6px #ffd30a, 0 12px 35px rgba(0,0,0,0.7), inset 0 0 18px rgba(0,0,0,0.85), inset 0 0 0 1.5px #8e6d1b',
+                        display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'1px',
+                        color:'#f5d37a', fontWeight:800, cursor: isSpinning ? 'not-allowed' : 'pointer',
+                        padding:0, opacity: isSpinning ? 0.8 : 1, transition:'all 0.25s',
+                        fontFamily:'"Playfair Display", "Segoe UI", sans-serif'
                       }}
                       onMouseOver={(e) => { if(!isSpinning) e.currentTarget.style.transform = 'scale(1.05)'; }}
                       onMouseOut={(e) => { if(!isSpinning) e.currentTarget.style.transform = 'scale(1)'; }}
                     >
-                      <Gift size={22} style={{ marginBottom:'2px' }}/>
-                      سحب
+                      {/* Luxury Monogram Emblem */}
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ marginBottom:'2px', filter:'drop-shadow(0 0 5px rgba(255,211,10,0.7))' }}>
+                        <rect x="9" y="2" width="6" height="3" rx="1" fill="#FFD30A" stroke="#B48716" strokeWidth="0.8"/>
+                        <rect x="10.5" y="5" width="3" height="2" fill="#FFE259"/>
+                        <path d="M6 7.5C6 7 6.6 6.5 7.5 6.5H16.5C17.4 6.5 18 7 18 7.5L19 19C19 20.5 18 21.5 16.5 21.5H7.5C6 21.5 5 20.5 5 19L6 7.5Z" fill="url(#hubPerfumeGrad)" stroke="#FFD30A" strokeWidth="1"/>
+                        <circle cx="12" cy="14" r="2.5" fill="#1C150A" stroke="#FFD30A" strokeWidth="0.8"/>
+                        <path d="M12 12.5V15.5M10.5 14H13.5" stroke="#FFD30A" strokeWidth="0.8" strokeLinecap="round"/>
+                        <defs>
+                          <linearGradient id="hubPerfumeGrad" x1="12" y1="6.5" x2="12" y2="21.5" gradientUnits="userSpaceOnUse">
+                            <stop stopColor="#FFF6C2"/>
+                            <stop offset="0.45" stopColor="#FFD30A"/>
+                            <stop offset="1" stopColor="#B48716"/>
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                      <span style={{ fontSize:'clamp(13px,3.4vw,18px)', lineHeight:1.1, letterSpacing:'0.14em', fontWeight:900 }}>ANGEL</span>
+                      <span style={{ fontSize:'clamp(9px,2.4vw,13px)', lineHeight:1.1, letterSpacing:'0.24em', opacity:0.95, color:'#f0ce4d' }}>PERFUM</span>
+                      <span style={{ fontFamily:'"Cairo", "Tajawal", "Segoe UI", sans-serif', fontSize:'clamp(8px,2vw,11px)', marginTop:'3px', color:'rgba(245,211,122,0.85)', fontWeight:600 }}>اضغط للسحب</span>
                     </button>
                   </div>
                 </div>
