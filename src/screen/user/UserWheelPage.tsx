@@ -258,15 +258,15 @@ export default function UserWheelPage({
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      const maxTextWidth = (outerRadius - innerRadius) * 0.90;
-      let fontSize = Math.max(14, Math.min(23, Math.floor(185 / n + 3)));
+      const maxTextWidth = (outerRadius - innerRadius) * 0.94;
+      let fontSize = Math.max(16, Math.min(28, Math.floor(210 / n + 3)));
       const setLabelFont = () => {
-        ctx.font = `800 ${fontSize}px "Cairo", "Tajawal", "Segoe UI", system-ui, sans-serif`;
+        ctx.font = `900 ${fontSize}px "Cairo", "Tajawal", "Segoe UI", system-ui, sans-serif`;
       };
       setLabelFont();
 
       let label = prize.label.trim();
-      while (fontSize > 13 && ctx.measureText(label).width > maxTextWidth) {
+      while (fontSize > 14 && ctx.measureText(label).width > maxTextWidth) {
         fontSize -= 1;
         setLabelFont();
       }
