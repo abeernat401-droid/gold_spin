@@ -674,7 +674,7 @@ export default function UserWheelPage({
         </div>
 
         {/* ── WHEEL ── */}
-        <div style={{ position:'relative', display:'flex', flexDirection:'column', alignItems:'center' }}>
+        <div style={{ position:'relative', display:'flex', flexDirection:'column', alignItems:'center', direction:'ltr' }}>
 
           {/* Top golden horizon aura bar behind pointer */}
           <div style={{ position:'absolute', top:'-12px', left:'50%', transform:'translateX(-50%)', width:'220px', height:'28px', background:'radial-gradient(ellipse at center, rgba(255,211,10,0.4) 0%, rgba(212,175,55,0.18) 45%, transparent 75%)', pointerEvents:'none', zIndex:35 }}/>
@@ -702,13 +702,18 @@ export default function UserWheelPage({
               {/* Dark bezel */}
               <div style={{ borderRadius:'50%', padding:'0px', background:'transparent' }}>
 
-                {/* Wheel wrapper */}
+                {/* Wheel wrapper: Strictly 1:1 circular aspect ratio locked to prevent oval distortion */}
                 <div
                   className=""
                   style={{
-                    width:'clamp(300px,72vw,476px)',
-                    height:'clamp(300px,72vw,476px)',
-                    borderRadius:'50%', overflow:'hidden', position:'relative',
+                    width:'min(82vw, 440px)',
+                    height:'min(82vw, 440px)',
+                    aspectRatio:'1 / 1',
+                    borderRadius:'50%',
+                    overflow:'hidden',
+                    position:'relative',
+                    direction:'ltr',
+                    flexShrink:0,
                     boxShadow:'inset 0 0 50px rgba(0,0,0,0.4)',
                   }}
                 >
@@ -724,28 +729,34 @@ export default function UserWheelPage({
                   {/* Glass shine */}
                   <div style={{ position:'absolute', inset:0, borderRadius:'50%', background:'radial-gradient(circle at 32% 28%, rgba(255,255,255,0.06) 0%, transparent 55%)', pointerEvents:'none' }}/>
 
-                  {/* Center Spin Button Overlay matching the inner circle of the square sectors */}
-                  <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%, -50%)', zIndex:50 }}>
+                  {/* Center Spin Button Overlay: flex centered across inset 0 to guarantee dead-center alignment & perfect circular 1:1 shape */}
+                  <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', pointerEvents:'none', zIndex:50 }}>
                     <button
                       type="button"
                       aria-label="اسحب عجلة الجوائز"
                       onClick={handleSpinClick}
                       disabled={isSpinning}
                       style={{
-                        width:'clamp(128px, 44%, 200px)', height:'clamp(128px, 44%, 200px)', borderRadius:'50%',
+                        pointerEvents:'auto',
+                        width:'44%',
+                        height:'44%',
+                        aspectRatio:'1 / 1',
+                        borderRadius:'50%',
+                        flexShrink:0,
+                        boxSizing:'border-box',
                         background:'radial-gradient(circle at 40% 30%, #221a11 0%, #0d0a06 65%, #050403 100%)',
                         border:'3px solid #d4af37',
                         boxShadow:'0 0 0 2px #181208, 0 0 0 4.5px #ffd30a, 0 12px 30px rgba(0,0,0,0.7), inset 0 0 14px rgba(0,0,0,0.85)',
                         display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
                         color:'#f5d37a', fontWeight:800, cursor: isSpinning ? 'not-allowed' : 'pointer',
-                        padding:'6px', opacity: isSpinning ? 0.8 : 1, transition:'all 0.25s',
+                        padding:'4px', opacity: isSpinning ? 0.8 : 1, transition:'all 0.25s',
                         fontFamily:'"Playfair Display", "Segoe UI", sans-serif'
                       }}
-                      onMouseOver={(e) => { if(!isSpinning) e.currentTarget.style.transform = 'scale(1.05)'; }}
+                      onMouseOver={(e) => { if(!isSpinning) e.currentTarget.style.transform = 'scale(1.04)'; }}
                       onMouseOut={(e) => { if(!isSpinning) e.currentTarget.style.transform = 'scale(1)'; }}
                     >
                       {/* Luxury Monogram Emblem */}
-                      <svg width="25" height="25" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ marginBottom:'2px', filter:'drop-shadow(0 0 5px rgba(255,211,10,0.7))' }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ marginBottom:'2px', filter:'drop-shadow(0 0 5px rgba(255,211,10,0.7))' }}>
                         <rect x="9" y="2" width="6" height="3" rx="1" fill="#FFD30A" stroke="#B48716" strokeWidth="0.8"/>
                         <rect x="10.5" y="5" width="3" height="2" fill="#FFE259"/>
                         <path d="M6 7.5C6 7 6.6 6.5 7.5 6.5H16.5C17.4 6.5 18 7 18 7.5L19 19C19 20.5 18 21.5 16.5 21.5H7.5C6 21.5 5 20.5 5 19L6 7.5Z" fill="url(#hubPerfumeGrad)" stroke="#FFD30A" strokeWidth="1"/>
@@ -753,7 +764,7 @@ export default function UserWheelPage({
                         <path d="M12 12.5V15.5M10.5 14H13.5" stroke="#FFD30A" strokeWidth="0.8" strokeLinecap="round"/>
                         <defs>
                           <linearGradient id="hubPerfumeGrad" x1="12" y1="6.5" x2="12" y2="21.5" gradientUnits="userSpaceOnUse">
-                            <stop stopColor="#FFF6C2"/>
+                            <stop stopColor="#FFF2A8"/>
                             <stop offset="0.45" stopColor="#FFD30A"/>
                             <stop offset="1" stopColor="#B48716"/>
                           </linearGradient>
