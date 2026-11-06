@@ -221,31 +221,35 @@ export default function UserWheelPage({
       return;
     }
 
+    const innerRadius = radius * 0.46;
+    const outerRadius = radius - 8;
+    const textRadius = (innerRadius + outerRadius) / 2;
     const sliceAngle = (Math.PI * 2) / n;
 
-    // Draw every slice using the color saved for its prize.
+    // Draw every item as a 4-sided curved square block (مربع)
     activePrizes.forEach((prize, i) => {
       const startA = i * sliceAngle;
       const endA = startA + sliceAngle;
       const midA = startA + sliceAngle / 2;
       const darkSlice = isDarkColor(prize.color);
 
+      // 4-sided curved square block
       ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.arc(cx, cy, radius - 5, startA, endA);
+      ctx.arc(cx, cy, outerRadius, startA, endA, false);
+      ctx.arc(cx, cy, innerRadius, endA, startA, true);
       ctx.closePath();
       ctx.fillStyle = prize.color;
       ctx.fill();
 
-      // Fine bronze dividers like the reference wheel.
+      // Divider lines between the square blocks
       ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(cx + radius * Math.cos(startA), cy + radius * Math.sin(startA));
+      ctx.moveTo(cx + innerRadius * Math.cos(startA), cy + innerRadius * Math.sin(startA));
+      ctx.lineTo(cx + outerRadius * Math.cos(startA), cy + outerRadius * Math.sin(startA));
       ctx.strokeStyle = darkSlice ? '#ffd30a' : '#6e4815';
-      ctx.lineWidth = 1.6;
+      ctx.lineWidth = 1.8;
       ctx.stroke();
 
-      // Keep labels inside their slices and upright on the left half.
+      // Keep labels inside their square blocks
       ctx.save();
       ctx.translate(cx, cy);
       const normA = ((midA % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
@@ -254,8 +258,8 @@ export default function UserWheelPage({
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      const maxTextWidth = radius * 0.48;
-      let fontSize = Math.max(13, Math.min(18, Math.floor(155 / n + 3)));
+      const maxTextWidth = (outerRadius - innerRadius) * 0.85;
+      let fontSize = Math.max(12, Math.min(17, Math.floor(155 / n + 3)));
       const setLabelFont = () => {
         ctx.font = `800 ${fontSize}px "Cairo", "Tajawal", "Segoe UI", system-ui, sans-serif`;
       };
@@ -275,7 +279,6 @@ export default function UserWheelPage({
       }
 
       ctx.fillStyle = prize.textColor || wheelTextColor(prize.color);
-      const textRadius = radius * 0.63;
       const labelX = flipLabel ? -textRadius : textRadius;
       ctx.shadowColor = 'rgba(0,0,0,0.12)';
       ctx.shadowBlur = 1;
@@ -283,7 +286,7 @@ export default function UserWheelPage({
       ctx.restore();
     });
 
-    // Multi-ring outer border matching reference wheel
+    // Outer multi-ring gold border framing the top of the squares
     ctx.beginPath();
     ctx.arc(cx, cy, radius - 2, 0, Math.PI * 2);
     ctx.lineWidth = 5;
@@ -292,21 +295,40 @@ export default function UserWheelPage({
 
     ctx.beginPath();
     ctx.arc(cx, cy, radius - 6, 0, Math.PI * 2);
-    ctx.lineWidth = 3.5;
+    ctx.lineWidth = 3;
     ctx.strokeStyle = '#1e170c';
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.arc(cx, cy, radius - 10, 0, Math.PI * 2);
-    ctx.lineWidth = 4;
+    ctx.arc(cx, cy, outerRadius, 0, Math.PI * 2);
+    ctx.lineWidth = 3.5;
+    ctx.strokeStyle = '#ffd30a';
+    ctx.stroke();
+
+    // Inner multi-ring gold border framing the bottom of the squares
+    ctx.beginPath();
+    ctx.arc(cx, cy, innerRadius, 0, Math.PI * 2);
+    ctx.lineWidth = 3.5;
     ctx.strokeStyle = '#ffd30a';
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.arc(cx, cy, radius - 13, 0, Math.PI * 2);
-    ctx.lineWidth = 1.5;
-    ctx.strokeStyle = '#765018';
+    ctx.arc(cx, cy, innerRadius - 2.5, 0, Math.PI * 2);
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = '#1e170c';
     ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, innerRadius - 5, 0, Math.PI * 2);
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#d4af37';
+    ctx.stroke();
+
+    // Fill center behind button
+    ctx.beginPath();
+    ctx.arc(cx, cy, innerRadius - 6, 0, Math.PI * 2);
+    ctx.fillStyle = '#0d0a06';
+    ctx.fill();
   };
 
   const handleSpinClick = () => {
@@ -702,7 +724,7 @@ export default function UserWheelPage({
                   {/* Glass shine */}
                   <div style={{ position:'absolute', inset:0, borderRadius:'50%', background:'radial-gradient(circle at 32% 28%, rgba(255,255,255,0.06) 0%, transparent 55%)', pointerEvents:'none' }}/>
 
-                  {/* Center Spin Button Overlay */}
+                  {/* Center Spin Button Overlay matching the inner circle of the square sectors */}
                   <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%, -50%)', zIndex:50 }}>
                     <button
                       type="button"
@@ -710,20 +732,20 @@ export default function UserWheelPage({
                       onClick={handleSpinClick}
                       disabled={isSpinning}
                       style={{
-                        width:'clamp(92px, 30%, 132px)', height:'clamp(92px, 30%, 132px)', borderRadius:'50%',
+                        width:'clamp(128px, 44%, 200px)', height:'clamp(128px, 44%, 200px)', borderRadius:'50%',
                         background:'radial-gradient(circle at 40% 30%, #221a11 0%, #0d0a06 65%, #050403 100%)',
                         border:'3px solid #d4af37',
-                        boxShadow:'0 0 0 2px #181208, 0 0 0 4.5px #ffd30a, 0 10px 26px rgba(0,0,0,0.65), inset 0 0 10px rgba(0,0,0,0.85)',
+                        boxShadow:'0 0 0 2px #181208, 0 0 0 4.5px #ffd30a, 0 12px 30px rgba(0,0,0,0.7), inset 0 0 14px rgba(0,0,0,0.85)',
                         display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
                         color:'#f5d37a', fontWeight:800, cursor: isSpinning ? 'not-allowed' : 'pointer',
-                        padding:'4px', opacity: isSpinning ? 0.8 : 1, transition:'all 0.25s',
+                        padding:'6px', opacity: isSpinning ? 0.8 : 1, transition:'all 0.25s',
                         fontFamily:'"Playfair Display", "Segoe UI", sans-serif'
                       }}
                       onMouseOver={(e) => { if(!isSpinning) e.currentTarget.style.transform = 'scale(1.05)'; }}
                       onMouseOut={(e) => { if(!isSpinning) e.currentTarget.style.transform = 'scale(1)'; }}
                     >
                       {/* Luxury Monogram Emblem */}
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ marginBottom:'2px', filter:'drop-shadow(0 0 4px rgba(255,211,10,0.7))' }}>
+                      <svg width="25" height="25" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ marginBottom:'2px', filter:'drop-shadow(0 0 5px rgba(255,211,10,0.7))' }}>
                         <rect x="9" y="2" width="6" height="3" rx="1" fill="#FFD30A" stroke="#B48716" strokeWidth="0.8"/>
                         <rect x="10.5" y="5" width="3" height="2" fill="#FFE259"/>
                         <path d="M6 7.5C6 7 6.6 6.5 7.5 6.5H16.5C17.4 6.5 18 7 18 7.5L19 19C19 20.5 18 21.5 16.5 21.5H7.5C6 21.5 5 20.5 5 19L6 7.5Z" fill="url(#hubPerfumeGrad)" stroke="#FFD30A" strokeWidth="1"/>
@@ -737,9 +759,9 @@ export default function UserWheelPage({
                           </linearGradient>
                         </defs>
                       </svg>
-                      <span style={{ fontSize:'clamp(11px, 2.9vw, 15px)', lineHeight:1.15, letterSpacing:'0.12em', fontWeight:900 }}>ANGEL</span>
-                      <span style={{ fontSize:'clamp(8px, 2.1vw, 11px)', lineHeight:1.15, letterSpacing:'0.22em', opacity:0.95, color:'#f0ce4d' }}>PERFUM</span>
-                      <span style={{ fontFamily:'"Cairo", "Tajawal", "Segoe UI", sans-serif', fontSize:'clamp(7px, 1.8vw, 9px)', lineHeight:1.1, marginTop:'3px', color:'rgba(245,211,122,0.85)', fontWeight:600 }}>اضغط للسحب</span>
+                      <span style={{ fontSize:'clamp(12px, 3.5vw, 17px)', lineHeight:1.15, letterSpacing:'0.14em', fontWeight:900 }}>ANGEL</span>
+                      <span style={{ fontSize:'clamp(9px, 2.5vw, 12px)', lineHeight:1.15, letterSpacing:'0.24em', opacity:0.95, color:'#f0ce4d' }}>PERFUM</span>
+                      <span style={{ fontFamily:'"Cairo", "Tajawal", "Segoe UI", sans-serif', fontSize:'clamp(7.5px, 2vw, 10px)', lineHeight:1.1, marginTop:'3px', color:'rgba(245,211,122,0.85)', fontWeight:600 }}>اضغط للسحب</span>
                     </button>
                   </div>
                 </div>
